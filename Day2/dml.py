@@ -1,7 +1,10 @@
 #import module
-from fastapi import FastAPI,status,HTTPException,APIRouter
+from fastapi import FastAPI,status,HTTPException,APIRouter,Depends
 from . import schema
+from . import models
 from random import randrange
+from sqlalchemy.orm import Session
+from .database import engine,get_connection
 
 #creating object
 router = APIRouter(tags=["User DML App"])
@@ -11,11 +14,16 @@ user_data=[]
 
 #add user in array
 @router.post('/adduser')
-def addUser(user:schema.User):
-    data=user.model_dump()  #model dump converts input data in key value pairs
-    data['id']=randrange(0,10000) #generate random value
-    user_data.append(data)
-    return {'message': data}
+def addUser(user:schema.User,db:Session=Depends(get_connection)):
+    #data=user.model_dump()  #model dump converts input data in key value pairs
+    postdata= models.UserApp(**user.model_dump())
+    db.add(postdata)
+    db.commit()
+
+
+   # data['id']=randrange(0,10000) #generate random value
+    #user_data.append(data)
+    return {'message': postdata}
 
 #reusable function to perform (search,update and delete)
 def searchUser(id):
