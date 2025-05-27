@@ -33,21 +33,21 @@ def searchUser(id):
         
 
 # delete the user with id
-@router.delete('/deleteuser/{id}')
-def loadUser(id:int):
-    post=searchUser(id)
+@router.delete('/deleteuser/{name}')
+def loadUser(name,db:Session=Depends(get_connection)):
+    post=db.query(models.UserApp).filter(models.UserApp.uname == name).first()
     if post == None:
        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User with Given ID , NOT Found")
-    user_data.pop(post)
+    post.delete(synchronize_session=False)
+    db.commit()
     return {'user is deleted ': post}
 
 #update the user (accept ID and data to update)
-@router.put('/update user/{id}')
-def updateUser(id:int,user:schema.User):
-    indexId=searchUser(id)
-    if indexId == None:
+@router.put('/update user/{name}')
+def updateUser(name,db:Session=Depends(get_connection)):
+    post=db.query(models.UserApp).filter(models.UserApp.uname == name).first()
+    if post == None:
        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User with Given ID , NOT Found")
-    data=user.model_dump()
-    user['id']= id
-    user_data[indexId]=data
-    return {'user is updated ': data}
+    post.update(synchronize_session=False)
+    db.commit()
+    return {'user is updated ': post}
