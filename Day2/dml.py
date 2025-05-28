@@ -38,7 +38,8 @@ def loadUser(name,db:Session=Depends(get_connection)):
     post=db.query(models.UserApp).filter(models.UserApp.uname == name).first()
     if post == None:
        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User with Given ID , NOT Found")
-    post.delete(synchronize_session=False)
+    #post.delete(synchronize_session=False)
+    db.delete(post)
     db.commit()
     return {'user is deleted ': post}
 
@@ -48,6 +49,7 @@ def updateUser(name,db:Session=Depends(get_connection)):
     post=db.query(models.UserApp).filter(models.UserApp.uname == name).first()
     if post == None:
        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User with Given ID , NOT Found")
-    post.update(synchronize_session=False)
+    #db.update(synchronize_session=False)
+    db._update_impl(post)
     db.commit()
     return {'user is updated ': post}
